@@ -70,7 +70,6 @@ workspace "*"
 
 	cppdialect "C++17"
 	staticruntime "on"
-	buildoptions { "/sdl" }
 	warnings "Extra"
 
 	-- Automated defines for resources
@@ -105,3 +104,6 @@ filter { "toolset:*_xp"}
 filter { "toolset:not *_xp"}
 	defines { "WINVER=0x0601", "_WIN32_WINNT=0x0601" } -- Target Win7
 	conformancemode "on"
+
+filter { "toolset:msc*" }
+	buildoptions { "/sdl" }
