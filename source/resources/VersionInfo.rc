@@ -70,17 +70,17 @@ BEGIN
         BLOCK "040904b0"
         BEGIN
 #ifdef rsc_CompanyName
-            VALUE "CompanyName", rsc_CompanyName
+            VALUE "CompanyName", STRINGIZE(rsc_CompanyName)
 #endif
-            VALUE "FileDescription", rsc_FullName
+            VALUE "FileDescription", STRINGIZE("rsc_FullName")
             VALUE "FileVersion", STRINGIZE(rsc_MajorVersion) "." STRINGIZE(rsc_MinorVersion) "." STRINGIZE(rsc_RevisionID) "." STRINGIZE(rsc_BuildID)
-            VALUE "InternalName", rsc_Name rsc_Extension
-            VALUE "LegalCopyright", "Copyright (C) " rsc_Copyright
-            VALUE "OriginalFilename", rsc_Name rsc_Extension
-            VALUE "ProductName", rsc_Name
+            VALUE "InternalName", STRINGIZE(rsc_Name) STRINGIZE(rsc_Extension)
+            VALUE "LegalCopyright", "Copyright (C) " STRINGIZE(rsc_Copyright)
+            VALUE "OriginalFilename", STRINGIZE(rsc_Name) STRINGIZE(rsc_Extension)
+            VALUE "ProductName", STRINGIZE(rsc_Name)
             VALUE "ProductVersion", STRINGIZE(rsc_MajorVersion) "." STRINGIZE(rsc_MinorVersion) "." STRINGIZE(rsc_RevisionID) "." STRINGIZE(rsc_BuildID)
 #ifdef rsc_UpdateURL
-			VALUE "UpdateUrl", rsc_UpdateURL
+			VALUE "UpdateUrl", STRINGIZE(rsc_UpdateURL)
 #endif
         END
     END
