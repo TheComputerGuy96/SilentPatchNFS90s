@@ -626,7 +626,7 @@ void OnInitializeHook()
 			auto start_stream_thread = get_pattern<void*>("50 31 D2 B8 ? ? ? ? E8 ? ? ? ? 8B 86 A4 00 00 00", 3 + 1);
 
 			orgStreamThread_NFS2SE = *start_stream_thread;
-			*start_stream_thread = StreamThread_NFS2SE_Wrap;
+			*start_stream_thread = reinterpret_cast<void*>(StreamThread_NFS2SE_Wrap);
 
 			bPinnedSpecificThreads = true;
 		}
@@ -642,7 +642,7 @@ void OnInitializeHook()
 			auto start_stream_thread = get_pattern<void*>("50 31 DB 89 48 54 6A FF B9 01 00 00 00 B8 ? ? ? ? E8 ? ? ? ? 85 C0", 6 + 2 + 5 + 1);
 
 			orgStreamThread_NFS4 = *start_stream_thread;
-			*start_stream_thread = StreamThread_NFS4_Wrap;
+			*start_stream_thread = reinterpret_cast<void*>(StreamThread_NFS4_Wrap);
 
 			bPinnedSpecificThreads = true;
 		}
@@ -658,7 +658,7 @@ void OnInitializeHook()
 		{
 			// Neuter SetProcessAffinityMask so Modern Patch or other solutions can't override
 			// our more fine-grained changes
-			Memory::VP::InjectHook(&::SetProcessAffinityMask, AffinityChanges::SetProcessAffinityMask_Stub, HookType::Jump);
+			VP::InjectHook(&::SetProcessAffinityMask, AffinityChanges::SetProcessAffinityMask_Stub, VP::HookType::Jump);
 		}
 	}
 
