@@ -76,13 +76,13 @@ bool ShouldEnableAffinityChanges()
 	const std::wstring section = exeFSPath.stem().wstring();
 	const std::wstring iniPath = exeFSPath.replace_extension(L".ini").wstring();
 
-	const UINT singleProcAffinity = GetPrivateProfileIntW(section.c_str(), L"SingleProcAffinity", -1, iniPath.c_str());
+	const int singleProcAffinity = GetPrivateProfileIntW(section.c_str(), L"SingleProcAffinity", -1, iniPath.c_str());
 	if (singleProcAffinity != -1)
 	{
 		if (singleProcAffinity != 0)
 		{
 			// Don't enable our changes if they're specifically requested to be disabled
-			const UINT spAffinity = GetPrivateProfileIntW(section.c_str(), L"SilentPatchAffinity", -1, iniPath.c_str());
+			const int spAffinity = GetPrivateProfileIntW(section.c_str(), L"SilentPatchAffinity", -1, iniPath.c_str());
 			return spAffinity != 0;
 		}
 	}
