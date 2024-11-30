@@ -93,6 +93,9 @@ filter { "platforms:Win32" }
 	system "Windows"
 	architecture "x86"
 
+filter { "platforms:Win32", "toolset:not msc*" }
+	architecture "ARM" -- Hack to prevent messing up LDFLAGS on MinGW GCC
+
 filter { "platforms:Win64" }
 	system "Windows"
 	architecture "x86_64"
