@@ -107,3 +107,6 @@ filter { "toolset:not *_xp"}
 
 filter { "toolset:msc*" }
 	buildoptions { "/sdl" }
+
+filter { "toolset:not msc*" }
+	buildoptions { "-masm=intel" }

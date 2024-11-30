@@ -11,10 +11,10 @@
 #include <filesystem>
 
 // Macroes for Watcom register wrapper functions
+#ifdef _MSC_VER
 #define WATCOM_PROLOG_0_PARAMS \
 					_asm push ebp \
 					_asm mov ebp, esp \
-					_asm sub esp, __LOCAL_SIZE \
 					_asm push ebx \
 					_asm push ecx \
 					_asm push edx \
@@ -33,9 +33,35 @@
 					_asm ret
 
 #define WATCOM_PROLOG_1_PARAM \
-					void* arg1; \
 					WATCOM_PROLOG_0_PARAMS \
-					_asm mov [arg1], eax
+					_asm mov arg1, eax
+#else
+#define WATCOM_PROLOG_0_PARAMS \
+					__asm__ volatile ( \
+						"push ebp\n" \
+						"mov ebp, esp\n" \
+						"push ebx\n" \
+						"push ecx\n" \
+						"push edx\n" \
+						"push esi\n" \
+						"push edi" );
+
+
+#define WATCOM_EPILOG_0_PARAMS \
+					__asm__ volatile ( \
+						"pop edi\n" \
+						"pop esi\n" \
+						"pop edx\n" \
+						"pop ecx\n" \
+						"pop ebx\n" \
+						"mov esp, ebp\n" \
+						"pop ebp\n" \
+						"ret" );
+
+#define WATCOM_PROLOG_1_PARAM \
+					WATCOM_PROLOG_0_PARAMS \
+					__asm__ volatile ("mov %[arg1], eax\n" : [arg1] "=m" (arg1));
+#endif
 
 #define WATCOM_EPILOG_1_PARAM WATCOM_EPILOG_0_PARAMS
 
@@ -183,21 +209,36 @@ namespace StreamThreadAffinity
 	{
 		WATCOM_PROLOG_0_PARAMS;
 		SetThreadAffinityMask(GetCurrentThread(), AffinityChanges::gameThreadAffinity);
+#ifdef _MSC_VER
 		_asm call orgStreamThread_NFS2SE
+#else
+		__asm__ volatile ("call %[orgStreamThread_NFS2SE]" :: [orgStreamThread_NFS2SE] "m" (orgStreamThread_NFS2SE));
+#endif
 		WATCOM_EPILOG_0_PARAMS;
 	}
 
 	// StreamThread_NFS4 is a Watcom register call with a parameter in eax
 	static void* orgStreamThread_NFS4;
+	static void* arg1;
 	__declspec(naked) void StreamThread_NFS4_Wrap()
 	{
 		WATCOM_PROLOG_1_PARAM;
 		SetThreadAffinityMask(GetCurrentThread(), AffinityChanges::gameThreadAffinity);
+#ifdef _MSC_VER
 		_asm
 		{
-			mov		eax, [arg1]
+			mov		eax, arg1
 			call	orgStreamThread_NFS4
-		}	
+		}
+#else
+		__asm__ volatile
+		(
+			"mov	eax, %[arg1]\n"
+			"call	%[orgStreamThread_NFS4]"
+			:: [arg1] "m" (arg1),
+			[orgStreamThread_NFS4] "m" (orgStreamThread_NFS4)
+		);
+#endif
 		WATCOM_EPILOG_1_PARAM;
 	}
 }
@@ -212,7 +253,11 @@ namespace NFS2SEMovieRaceFix
 		WATCOM_PROLOG_0_PARAMS;
 
 		startupEvent = CreateEvent(nullptr, FALSE, TRUE, nullptr);
+#ifdef _MSC_VER
 		_asm call orgCreateMutex
+#else
+		__asm__ volatile ("call %[orgCreateMutex]" :: [orgCreateMutex] "m" (orgCreateMutex));
+#endif
 
 		WATCOM_EPILOG_0_PARAMS;
 	}
@@ -240,6 +285,7 @@ namespace NFS2SEMovieRaceFix
 
 __declspec(naked) void NFS2SE_MouseZeroEax()
 {
+#ifdef _MSC_VER
 	_asm
 	{
 		mov		ebx, ecx
@@ -248,11 +294,22 @@ __declspec(naked) void NFS2SE_MouseZeroEax()
 		xor		edx, edx
 		ret
 	}
+#else
+	__asm__ volatile
+	(
+		"mov	ebx, ecx\n"
+		"shl	ebx, 4\n"
+		"xor	eax, eax\n"
+		"xor	edx, edx\n"
+		"ret"
+	);
+#endif
 }
 
 __declspec(naked) void NFS4_PollZeroEdi()
 {
 	// if (edi >= 0) edi = 0;
+#ifdef _MSC_VER
 	_asm
 	{
 		mov		edi, eax
@@ -261,6 +318,16 @@ __declspec(naked) void NFS4_PollZeroEdi()
 		test	edi, edi
 		ret
 	}
+#else
+	__asm__ volatile
+	(
+		"mov	edi, eax\n"
+		"sar	edi, 31\n"
+		"and	edi, eax\n"
+		"test	edi, edi\n"
+		"ret"
+	);
+#endif
 }
 
 
@@ -287,12 +354,22 @@ namespace NFS5EnumDevices
 	static const auto pFakeVMT = reinterpret_cast<uintptr_t>(&pEnumDInputDevices) - 0x10;
 	__declspec(naked) void SetPtrToEnumDevices()
 	{
+#ifdef _MSC_VER
 		_asm
 		{
-			mov		[esp+14h-4], esi
-			mov		ecx, [pFakeVMT]
+			mov		[esp+0x14-4], esi
+			mov		ecx, pFakeVMT
 			ret
 		}
+#else
+		__asm__ volatile
+		(
+			"mov	[esp+0x14-4], esi\n"
+			"mov	ecx, %[pFakeVMT]\n"
+			"ret"
+			:: [pFakeVMT] "m" (pFakeVMT)
+		);
+#endif
 	}
 }
 
